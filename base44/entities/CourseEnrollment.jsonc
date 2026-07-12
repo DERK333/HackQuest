@@ -39,10 +39,7 @@
   ],
   "rls": {
     "create": {
-      "data.student_email": "{{user.email}}",
-      "user_condition": {
-        "$ne": null
-      }
+      "data.student_email": "{{user.email}}"
     },
     "read": {
       "$or": [

@@ -36,7 +36,11 @@
     "module_title"
   ],
   "rls": {
-    "create": null,
+    "create": {
+      "user_condition": {
+        "role": "user"
+      }
+    },
     "read": {
       "$or": [
         {
@@ -52,32 +56,14 @@
       ]
     },
     "update": {
-      "$or": [
-        {
-          "data.enrollment_id": {
-            "$in": "{{base44.entities.CourseEnrollment.filter({'data.student_email':'{{user.email}}'},'id')}}"
-          }
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
+      "user_condition": {
+        "role": "admin"
+      }
     },
     "delete": {
-      "$or": [
-        {
-          "data.enrollment_id": {
-            "$in": "{{base44.entities.CourseEnrollment.filter({'data.student_email':'{{user.email}}'},'id')}}"
-          }
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
+      "user_condition": {
+        "role": "admin"
+      }
     }
   }
 }

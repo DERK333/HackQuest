@@ -31,11 +31,9 @@
   ],
   "rls": {
     "create": {
-      "user_condition": {
-        "$ne": null
-      }
+      "data.author_email": "{{user.email}}"
     },
-    "read": {},
+    "read": null,
     "update": {
       "$or": [
         {
