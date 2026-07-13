@@ -17,14 +17,18 @@ export default function Contact() {
     setStatus('sending');
     setError('');
 
-    await base44.integrations.Core.SendEmail({
-      to: 'support@hack-quest.com',
-      subject: `[HackQuest Contact] ${form.subject}`,
-      body: `Name: ${form.name}\nEmail: ${form.email}\n\n${form.message}`,
-    });
-
-    setStatus('success');
-    setForm({ name: '', email: '', subject: '', message: '' });
+    try {
+      await base44.integrations.Core.SendEmail({
+        to: 'support@hack-quest.com',
+        subject: `[HackQuest Contact] ${form.subject}`,
+        body: `Name: ${form.name}\nEmail: ${form.email}\n\n${form.message}`,
+      });
+      setStatus('success');
+      setForm({ name: '', email: '', subject: '', message: '' });
+    } catch {
+      setStatus('error');
+      setError('Failed to send message. Please email us directly at support@hack-quest.com');
+    }
   };
 
   return (

@@ -9,7 +9,8 @@ import AuthLayout from "@/components/AuthLayout";
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
-  const resetToken = searchParams.get("token");
+  // Firebase sends oobCode in the reset-password link; fall back to legacy 'token' param
+  const resetToken = searchParams.get("oobCode") || searchParams.get("token");
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
