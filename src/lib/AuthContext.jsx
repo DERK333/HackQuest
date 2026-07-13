@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { getUserProfile } from '@/api/firebaseClient';
+import { getUserProfile, LOGIN_PATH } from '@/api/firebaseClient';
 
 const AuthContext = createContext();
 
@@ -40,13 +40,13 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const logout = () => {
-    import('firebase/auth').then(({ signOut }) => signOut(auth));
+    signOut(auth);
     setUser(null);
     setIsAuthenticated(false);
   };
 
   const navigateToLogin = () => {
-    window.location.href = `${import.meta.env.BASE_URL}login`;
+    window.location.href = LOGIN_PATH;
   };
 
   const checkAppState = () => {

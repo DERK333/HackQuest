@@ -38,7 +38,6 @@ import {
   limit as fbLimit,
   onSnapshot,
   setDoc,
-  serverTimestamp,
 } from 'firebase/firestore';
 import {
   ref as storageRef,
@@ -46,6 +45,9 @@ import {
   getDownloadURL,
 } from 'firebase/storage';
 import { auth, db, storage } from '@/lib/firebase';
+
+// Shared login path used by logout redirect and redirectToLogin
+export const LOGIN_PATH = `${import.meta.env.BASE_URL || '/'}login`;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Entity name → Firestore collection mapping
@@ -224,7 +226,7 @@ const fbAuth = {
   logout(redirectUrl) {
     signOut(auth).then(() => {
       if (redirectUrl && typeof redirectUrl === 'string') {
-        window.location.href = '/login';
+        window.location.href = redirectUrl;
       }
     });
   },
@@ -273,7 +275,7 @@ const fbAuth = {
   },
 
   redirectToLogin() {
-    window.location.href = `${import.meta.env.BASE_URL}login`;
+    window.location.href = LOGIN_PATH;
   },
 
   async updateMe(data) {
