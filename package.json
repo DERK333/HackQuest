@@ -12,8 +12,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@base44/sdk": "^0.8.38",
-    "@base44/vite-plugin": "^1.0.30",
     "@capacitor/android": "^8.4.1",
     "@capacitor/core": "^8.4.1",
     "@hello-pangea/dnd": "^17.0.0",
@@ -58,6 +56,7 @@
     "crypto-js": "^4.2.0",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.5.2",
+    "firebase": "^11.10.0",
     "framer-motion": "^11.16.4",
     "html2canvas": "^1.4.1",
     "input-otp": "^1.4.2",

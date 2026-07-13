@@ -122,7 +122,7 @@ export default function TopNav({ user, userPoints, streak }) {
               className={`flex items-center shrink-0 ${showBackButton ? 'hidden lg:flex' : 'flex'}`}
             >
               <img
-                src="https://media.base44.com/images/public/69bb33899baabd3ca91eb1f6/c6644a22c_HackQuest___logo___.png"
+                src="/HackQuest/logo.png"
                 alt="HackQuest"
                 className="h-10 w-auto"
               />
