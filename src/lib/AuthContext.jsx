@@ -1,56 +1,56 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
-import { getUserProfile, LOGIN_PATH } from '@/api/firebaseClient';
+import { base44 } from '@/api/base44Client';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser]                           = useState(null);
-  const [isAuthenticated, setIsAuthenticated]     = useState(false);
-  const [isLoadingAuth, setIsLoadingAuth]         = useState(true);
-  // Kept for API compatibility with components that destructure these
-  const [isLoadingPublicSettings]                 = useState(false);
-  const [authError, setAuthError]                 = useState(null);
-  const [appPublicSettings]                       = useState({ auth_required: false });
+  const [user, setUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
+  const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(true);
+  const [authError, setAuthError] = useState(null);
+  const [appPublicSettings, setAppPublicSettings] = useState({ auth_required: true });
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    const initAuth = async () => {
       try {
-        if (firebaseUser) {
-          const profile = await getUserProfile(firebaseUser);
-          setUser(profile);
-          setIsAuthenticated(true);
-        } else {
-          setUser(null);
-          setIsAuthenticated(false);
+        const authed = await base44.auth.isAuthenticated();
+        if (authed) {
+          try {
+            const me = await base44.auth.me();
+            setUser(me);
+            setIsAuthenticated(true);
+          } catch (err) {
+            if (err?.status === 403) {
+              setAuthError({ type: 'user_not_registered' });
+            } else {
+              throw err;
+            }
+          }
         }
-        setAuthError(null);
       } catch (err) {
-        console.error('Auth state change error:', err);
-        setAuthError({ type: 'unknown', message: err.message });
-        setUser(null);
-        setIsAuthenticated(false);
+        console.error('Auth init error:', err);
+        setAuthError({ type: 'unknown', message: err?.message });
       } finally {
         setIsLoadingAuth(false);
+        setIsLoadingPublicSettings(false);
       }
-    });
-
-    return () => unsubscribe();
+    };
+    initAuth();
   }, []);
 
-  const logout = () => {
-    signOut(auth);
+  const logout = (redirectUrl) => {
+    base44.auth.logout(redirectUrl);
     setUser(null);
     setIsAuthenticated(false);
   };
 
-  const navigateToLogin = () => {
-    window.location.href = LOGIN_PATH;
+  const navigateToLogin = (nextUrl) => {
+    base44.auth.redirectToLogin(nextUrl);
   };
 
-  const checkAppState = () => {
-    // Re-check by triggering a re-read of auth state (no-op in Firebase — handled by onAuthStateChanged)
+  const checkAppState = async () => {
+    // Re-check would require re-running init; platform handles token refresh
   };
 
   return (
