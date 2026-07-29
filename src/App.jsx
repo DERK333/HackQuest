@@ -15,6 +15,9 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import { Capacitor } from '@capacitor/core';
+import { App as CapacitorApp } from '@capacitor/app';
+import { StatusBar, Style } from '@capacitor/status-bar';
 
 // Lazy-loaded route components for code splitting
 const Dashboard          = lazy(() => import('./pages/Dashboard'));
@@ -118,15 +121,39 @@ const AuthenticatedApp = () => {
 
 function App() {
   React.useEffect(() => {
+    const isNative = Capacitor.isNativePlatform();
+
     const apply = (dark) => {
       document.documentElement.classList.toggle('dark', dark);
       document.documentElement.classList.toggle('light', !dark);
+      if (isNative) {
+        StatusBar.setStyle({ style: dark ? Style.Dark : Style.Light }).catch(() => {});
+      }
     };
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
     apply(mq.matches);
     const handler = (e) => apply(e.matches);
     mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
+
+    let backListener;
+    if (isNative) {
+      StatusBar.setOverlaysWebView({ overlay: true }).catch(() => {});
+      CapacitorApp.addListener('backButton', ({ canGoBack }) => {
+        const path = window.location.pathname.replace('/HackQuest', '') || '/';
+        if (path === '/' || path === '/Dashboard') {
+          CapacitorApp.exitApp();
+        } else if (canGoBack) {
+          window.history.back();
+        } else {
+          CapacitorApp.exitApp();
+        }
+      }).then((listener) => { backListener = listener; });
+    }
+
+    return () => {
+      mq.removeEventListener('change', handler);
+      backListener?.remove();
+    };
   }, []);
 
   return (
