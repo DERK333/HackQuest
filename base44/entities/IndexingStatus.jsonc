@@ -1,0 +1,96 @@
+{
+  "name": "IndexingStatus",
+  "type": "object",
+  "properties": {
+    "path_id": {
+      "type": "string",
+      "description": "ID of the LearningPath (course) this status tracks"
+    },
+    "path_title": {
+      "type": "string",
+      "description": "Cached title of the course for display"
+    },
+    "url": {
+      "type": "string",
+      "description": "The full URL inspected by Google Search Console"
+    },
+    "verdict": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "FAIL",
+        "NEUTRAL",
+        "NOT_CHECKED"
+      ],
+      "description": "GSC inspection verdict \u2014 PASS=indexed, FAIL=excluded, NEUTRAL=discovered not indexed"
+    },
+    "coverage_state": {
+      "type": "string",
+      "description": "Detailed coverage state from GSC (e.g. Indexed, Excluded, Crawled - currently not indexed)"
+    },
+    "indexing_state": {
+      "type": "string",
+      "description": "Whether indexing is allowed or blocked (e.g. INDEXING_ALLOWED, BLOCKED_BY_META_TAG)"
+    },
+    "last_crawl_time": {
+      "type": "string",
+      "description": "When Google last crawled this URL (ISO timestamp from GSC)"
+    },
+    "page_fetch_state": {
+      "type": "string",
+      "description": "Whether Google could fetch the page (e.g. FETCH_STATE_SUCCESS)"
+    },
+    "google_canonical": {
+      "type": "string",
+      "description": "Canonical URL Google chose for this page"
+    },
+    "user_canonical": {
+      "type": "string",
+      "description": "Canonical URL declared in the page"
+    },
+    "in_sitemap": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the URL was found in a submitted sitemap"
+    },
+    "robots_txt_state": {
+      "type": "string",
+      "description": "robots.txt check result (e.g. ROBOTS_TXT_STATE_UNBLOCKED)"
+    },
+    "checked_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date this status was last checked"
+    },
+    "error_message": {
+      "type": "string",
+      "description": "Error message if the GSC inspection call failed"
+    }
+  },
+  "required": [
+    "path_id",
+    "url"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

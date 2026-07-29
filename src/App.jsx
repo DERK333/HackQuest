@@ -41,6 +41,7 @@ const AttackLogs             = lazy(() => import('./pages/AttackLogs'));
 const CourseProgressTracker  = lazy(() => import('./pages/CourseProgressTracker'));
 const About                  = lazy(() => import('./pages/About'));
 const Contact                = lazy(() => import('./pages/Contact'));
+const IndexingMonitor        = lazy(() => import('./pages/IndexingMonitor'));
 
 function PageLoader() {
   return (
@@ -104,6 +105,7 @@ const AuthenticatedApp = () => {
           <Route path="/CourseProgressTracker" element={<CourseProgressTracker />} />
           <Route path="/About" element={<About />} />
           <Route path="/Contact" element={<Contact />} />
+          <Route path="/IndexingMonitor" element={<IndexingMonitor />} />
         </Route>
       </Route>
 
