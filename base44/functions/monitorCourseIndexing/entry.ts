@@ -8,15 +8,19 @@ export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
 
-    // Verify admin if called with a user session; allow scheduled (no user) calls
-    let user = null;
-    try {
-      user = await base44.auth.me();
-    } catch {
-      // No user session — scheduled automation call
-    }
-    if (user && user.role !== 'admin') {
-      return Response.json({ error: 'Forbidden — admin only' }, { status: 403 });
+    // Allow scheduled automation via platform token; otherwise require an admin session
+    const platformToken = req.headers.get('x-base44-automation') || req.headers.get('x-platform-token');
+    const appId = Deno.env.get('BASE44_APP_ID');
+    if (!platformToken || platformToken !== appId) {
+      let user = null;
+      try {
+        user = await base44.auth.me();
+      } catch {
+        // No user session present
+      }
+      if (!user || user.role !== 'admin') {
+        return Response.json({ error: 'Forbidden — admin only' }, { status: 403 });
+      }
     }
 
     const body = await req.json().catch(() => ({}));
