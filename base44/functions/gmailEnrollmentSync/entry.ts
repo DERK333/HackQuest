@@ -119,20 +119,13 @@ Return ONLY valid JSON with exactly these six fields.`,
 
 Deno.serve(async (req) => {
   try {
-    // Verify this is an internal platform webhook — reject direct invocations
-    const platformToken = req.headers.get('x-base44-automation') || req.headers.get('x-platform-token');
-    const appId = Deno.env.get('BASE44_APP_ID');
-    if (!platformToken || platformToken !== appId) {
-      // Also allow calls carrying a valid user session (e.g. admin testing)
-      const base44Check = createClientFromRequest(req);
-      const user = await base44Check.auth.me().catch(() => null);
-      if (!user || user.role !== 'admin') {
-        return Response.json({ error: 'Forbidden' }, { status: 403 });
-      }
+    const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me().catch(() => null);
+    if (!user || user.role !== 'admin') {
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const body = await req.json();
-    const base44 = createClientFromRequest(req);
 
     const messageIds = body.data?.new_message_ids ?? [];
     if (messageIds.length === 0) {

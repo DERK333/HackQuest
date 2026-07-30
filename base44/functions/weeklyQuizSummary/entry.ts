@@ -1,16 +1,13 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
+import { escapeHtml } from "../../shared/escapeHtml.ts";
 
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
 
-  // Allow scheduled automation invocations; otherwise require admin
-  const platformToken = req.headers.get('x-base44-automation') || req.headers.get('x-platform-token');
-  const appId = Deno.env.get('BASE44_APP_ID');
-  if (!platformToken || platformToken !== appId) {
-    const user = await base44.auth.me().catch(() => null);
-    if (!user || user.role !== 'admin') {
-      return Response.json({ error: 'Forbidden' }, { status: 403 });
-    }
+  // Require an authenticated admin session (scheduled automations run authenticated)
+  const user = await base44.auth.me().catch(() => null);
+  if (!user || user.role !== 'admin') {
+    return Response.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   const serviceBase44 = base44.asServiceRole;
@@ -122,7 +119,7 @@ Deno.serve(async (req) => {
         <span style="font-size:20px;font-weight:900;color:#0f1923;">TryHack<span>Me</span></span>
       </div>
       <h1 style="color:#f1f5f9;font-size:22px;margin:0 0 6px 0;">Your Weekly Summary 📬</h1>
-      <p style="color:#64748b;font-size:14px;margin:0;">Here's how you did this week, ${user.full_name || 'Hacker'}</p>
+      <p style="color:#64748b;font-size:14px;margin:0;">Here's how you did this week, ${escapeHtml(user.full_name || 'Hacker')}</p>
     </div>
 
     ${weeklyActivitySection}

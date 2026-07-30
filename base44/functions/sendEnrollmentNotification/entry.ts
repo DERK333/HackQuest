@@ -1,28 +1,15 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
-
-const escapeHtml = (str) => String(str ?? '').replace(/[&<>"']/g, (c) => ({
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;',
-  "'": '&#39;',
-})[c]);
+import { escapeHtml } from "../../shared/escapeHtml.ts";
 
 Deno.serve(async (req) => {
   try {
-    // Verify this is an internal platform automation — reject direct invocations
-    const platformToken = req.headers.get('x-base44-automation') || req.headers.get('x-platform-token');
-    const appId = Deno.env.get('BASE44_APP_ID');
-    if (!platformToken || platformToken !== appId) {
-      const base44Check = createClientFromRequest(req);
-      const user = await base44Check.auth.me().catch(() => null);
-      if (!user || user.role !== 'admin') {
-        return Response.json({ error: 'Forbidden' }, { status: 403 });
-      }
+    const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me().catch(() => null);
+    if (!user || user.role !== 'admin') {
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const body = await req.json();
-    const base44 = createClientFromRequest(req);
 
     const { data, event } = body;
 
