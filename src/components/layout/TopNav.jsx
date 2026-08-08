@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Shield, Flame, Trophy, Menu, X, LayoutDashboard, Map, Server, GitBranch, FlaskConical, Zap, Wrench, History, User, ChevronDown, Swords, Brain, Bookmark, MessageSquare, Wand2, BarChart2, ArrowLeft, ScrollText, GraduationCap, Mail, Globe } from 'lucide-react';
 import GlobalSearch from './GlobalSearch';
-import { assetUrl } from '@/lib/assetBase';
+import Logo from './Logo';
 
 // Root paths — no back button shown on these
 const ROOT_PATHS = new Set([
@@ -121,13 +121,10 @@ export default function TopNav({ user, userPoints, streak }) {
             {/* Logo — always visible on desktop, on mobile only on root screens */}
             <Link
               to="/Dashboard"
+              aria-label="HackQuest home"
               className={`flex items-center shrink-0 ${showBackButton ? 'hidden lg:flex' : 'flex'}`}
             >
-              <img
-                src={assetUrl('/logo.png')}
-                alt="HackQuest"
-                className="h-10 w-auto"
-              />
+              <Logo />
             </Link>
 
             {/* Desktop Nav */}
