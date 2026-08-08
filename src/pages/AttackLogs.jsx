@@ -14,6 +14,13 @@ const SEVERITY_CONFIG = {
   low:      { label: 'Low',      cls: 'bg-primary/10 text-primary border-primary/20', dot: 'bg-primary' },
 };
 
+const SEVERITY_RANK = {
+  critical: 0,
+  high: 1,
+  medium: 2,
+  low: 3,
+};
+
 const STATUS_CONFIG = {
   success: { label: 'Breached',  icon: XCircle,      cls: 'bg-destructive/10 text-destructive border-destructive/25' },
   blocked: { label: 'Blocked',   icon: CheckCircle2, cls: 'bg-primary/10 text-primary border-primary/20' },
@@ -111,6 +118,7 @@ export default function AttackLogs() {
   const [status,   setStatus]   = useState('all');
   const [days,     setDays]     = useState('all');
   const [live,     setLive]     = useState(true);
+  const [sort,     setSort]     = useState('newest');
 
   const handleRefresh = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: ['attack-logs'] });
@@ -133,7 +141,7 @@ export default function AttackLogs() {
     return unsub;
   }, [queryClient]);
 
-  // Filter
+  // Filter + sort
   const filtered = logs.filter(log => {
     if (severity !== 'all' && log.scenario_severity !== severity) return false;
     if (status !== 'all' && log.status !== status) return false;
@@ -143,6 +151,13 @@ export default function AttackLogs() {
       if (new Date(log.created_date) < cutoff) return false;
     }
     return true;
+  }).sort((a, b) => {
+    if (sort === 'severity') {
+      const rankDiff = (SEVERITY_RANK[a.scenario_severity] ?? 99) - (SEVERITY_RANK[b.scenario_severity] ?? 99);
+      if (rankDiff !== 0) return rankDiff;
+      return new Date(b.created_date) - new Date(a.created_date);
+    }
+    return new Date(b.created_date) - new Date(a.created_date);
   });
 
   // Stats
@@ -201,6 +216,44 @@ export default function AttackLogs() {
         <StatCard icon={CheckCircle2} label="Blocked"         value={blocked}  colorCls="bg-emerald-500/10 text-emerald-400" />
         <StatCard icon={XCircle}      label="Breached"        value={breached} colorCls="bg-destructive/10 text-destructive" />
         <StatCard icon={AlertTriangle}label="Critical"        value={critical} colorCls="bg-red-500/10 text-red-400" />
+      </div>
+
+      {/* Quick severity filters */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {[
+          { value: 'all', label: 'All', cls: 'bg-primary/10 text-primary border-primary/20', dot: 'bg-primary' },
+          { value: 'critical', label: 'Critical', cls: 'bg-red-500/15 text-red-400 border-red-500/30', dot: 'bg-red-400' },
+          { value: 'high', label: 'High', cls: 'bg-orange-500/15 text-orange-400 border-orange-500/30', dot: 'bg-orange-400' },
+          { value: 'medium', label: 'Medium', cls: 'bg-amber-500/15 text-amber-400 border-amber-500/30', dot: 'bg-amber-400' },
+        ].map(opt => {
+          const active = severity === opt.value;
+          return (
+            <button
+              key={opt.value}
+              onClick={() => setSeverity(opt.value)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold transition-all ${
+                active ? `${opt.cls} shadow-sm` : 'bg-secondary border-border text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${active ? opt.dot : 'bg-muted-foreground/40'}`} />
+              {opt.label}
+            </button>
+          );
+        })}
+        <div className="ml-auto flex items-center gap-1 bg-secondary border border-border rounded-lg p-0.5">
+          <button
+            onClick={() => setSort('newest')}
+            className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors ${sort === 'newest' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}
+          >
+            Newest
+          </button>
+          <button
+            onClick={() => setSort('severity')}
+            className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors ${sort === 'severity' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}
+          >
+            Severity
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
