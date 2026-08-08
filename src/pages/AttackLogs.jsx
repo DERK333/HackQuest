@@ -2,9 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
-import { Shield, AlertTriangle, Flame, CheckCircle2, XCircle, Clock, Filter, RefreshCw, Activity } from 'lucide-react';
+import { Shield, AlertTriangle, Flame, CheckCircle2, XCircle, Clock, Filter, RefreshCw, Activity, StickyNote } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { MobileSelect } from '@/components/ui/MobileSelect';
+import AttackNotesSidebar from '@/components/attacklogs/AttackNotesSidebar';
 import { format } from 'date-fns';
 
 const SEVERITY_CONFIG = {
@@ -62,13 +63,13 @@ function StatCard({ icon: Icon, label, value, colorCls }) {
   );
 }
 
-function LogRow({ log }) {
+function LogRow({ log, onNote }) {
   const sev = SEVERITY_CONFIG[log.scenario_severity] || SEVERITY_CONFIG.medium;
   const st  = STATUS_CONFIG[log.status] || STATUS_CONFIG.partial;
   const StatusIcon = st.icon;
 
   return (
-    <div className="grid grid-cols-[1fr_1fr_1fr_auto_auto] gap-3 items-center px-4 py-3 border-b border-border/50 last:border-0 hover:bg-secondary/30 transition-colors text-sm">
+    <div className="grid grid-cols-[1fr_1fr_1fr_auto_auto_auto] gap-3 items-center px-4 py-3 border-b border-border/50 last:border-0 hover:bg-secondary/30 transition-colors text-sm">
       {/* Source / attack type */}
       <div className="min-w-0">
         <p className="text-foreground font-semibold truncate flex items-center gap-1.5">
@@ -108,6 +109,15 @@ function LogRow({ log }) {
           {log.created_date ? format(new Date(log.created_date), 'MMM d, HH:mm') : '—'}
         </span>
       </div>
+
+      {/* Quick note for this incident */}
+      <button
+        onClick={() => onNote?.(log)}
+        title="Save a note for this incident"
+        className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors shrink-0"
+      >
+        <StickyNote className="w-3.5 h-3.5" />
+      </button>
     </div>
   );
 }
@@ -119,6 +129,8 @@ export default function AttackLogs() {
   const [days,     setDays]     = useState('all');
   const [live,     setLive]     = useState(true);
   const [sort,     setSort]     = useState('newest');
+  const [notesOpen, setNotesOpen] = useState(false);
+  const [notePresetLog, setNotePresetLog] = useState(null);
 
   const handleRefresh = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: ['attack-logs'] });
@@ -192,6 +204,12 @@ export default function AttackLogs() {
           <p className="text-sm text-muted-foreground mt-0.5">Real-time security incident feed</p>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => { setNotePresetLog(null); setNotesOpen(true); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-secondary text-muted-foreground hover:text-foreground transition-colors text-xs font-semibold"
+          >
+            <StickyNote className="w-3.5 h-3.5" /> Notes
+          </button>
           <button
             onClick={() => setLive(v => !v)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors ${
@@ -272,8 +290,8 @@ export default function AttackLogs() {
       {/* Table */}
       <div className="bg-card border border-border rounded-2xl overflow-hidden">
         {/* Column headers */}
-        <div className="grid grid-cols-[1fr_1fr_1fr_auto_auto] gap-3 px-4 py-2.5 border-b border-border bg-secondary/30">
-          {['Attack / Type', 'Target', 'OS / Stats', 'Severity', 'Status'].map((h, i) => (
+        <div className="grid grid-cols-[1fr_1fr_1fr_auto_auto_auto] gap-3 px-4 py-2.5 border-b border-border bg-secondary/30">
+          {['Attack / Type', 'Target', 'OS / Stats', 'Severity', 'Status', ''].map((h, i) => (
             <span key={i} className={`text-[10px] font-semibold uppercase tracking-widest text-muted-foreground ${i === 2 ? 'hidden md:block' : ''}`}>{h}</span>
           ))}
         </div>
@@ -290,7 +308,7 @@ export default function AttackLogs() {
           </div>
         ) : (
           <div>
-            {filtered.map(log => <LogRow key={log.id} log={log} />)}
+            {filtered.map(log => <LogRow key={log.id} log={log} onNote={(l) => { setNotePresetLog(l); setNotesOpen(true); }} />)}
           </div>
         )}
       </div>
@@ -298,6 +316,13 @@ export default function AttackLogs() {
       <p className="text-xs text-muted-foreground text-center">
         Showing {filtered.length} of {logs.length} total incidents
       </p>
+
+      <AttackNotesSidebar
+        open={notesOpen}
+        onOpenChange={setNotesOpen}
+        logs={logs}
+        presetLogId={notePresetLog?.id}
+      />
     </div>
   );
 }

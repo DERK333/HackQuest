@@ -1,0 +1,88 @@
+{
+  "name": "AttackNote",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email of the note owner"
+    },
+    "title": {
+      "type": "string",
+      "description": "Short title for the finding"
+    },
+    "content": {
+      "type": "string",
+      "description": "Detailed findings / notes"
+    },
+    "log_id": {
+      "type": "string",
+      "description": "Linked AttackLog ID (optional)"
+    },
+    "scenario_name": {
+      "type": "string",
+      "description": "Cached scenario name from the linked log"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "medium",
+        "high",
+        "critical"
+      ],
+      "description": "Cached severity from the linked log"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "User-defined tags"
+    }
+  },
+  "required": [
+    "user_email",
+    "title",
+    "content"
+  ],
+  "rls": {
+    "create": {
+      "data.user_email": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
