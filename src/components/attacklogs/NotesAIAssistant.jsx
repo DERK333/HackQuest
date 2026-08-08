@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Sparkles, Send, Loader2 } from 'lucide-react';
 
-// AI knowledge base: answers questions grounded ONLY in the user's saved notes.
+// AI knowledge base: answers questions from credible web sources (Gemini + Google
+// Search), using the analyst's own notes as context — not as the sole source.
 export default function NotesAIAssistant() {
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
@@ -18,22 +19,32 @@ export default function NotesAIAssistant() {
   });
 
   const ask = async () => {
-    if (!question.trim() || notes.length === 0) return;
+    if (!question.trim()) return;
     setLoading(true);
     setAnswer('');
     try {
-      const context = notes
-        .map(
-          (n) =>
-            `### ${n.title}\nScenario: ${n.scenario_name || '-'} | Severity: ${n.severity || '-'} | Tags: ${(n.tags || []).join(',')}\n${n.content}`
-        )
-        .join('\n\n---\n\n');
+      const noteContext = notes.length
+        ? notes
+            .map(
+              (n) =>
+                `### ${n.title}\nScenario: ${n.scenario_name || '-'} | Severity: ${n.severity || '-'} | Tags: ${(n.tags || []).join(',')}\n${n.content}`
+            )
+            .join('\n\n---\n\n')
+        : '(no notes saved yet)';
 
       const res = await base44.integrations.Core.InvokeLLM({
+        // gemini_3_flash supports add_context_from_internet (Google Search) so
+        // answers are sourced from credible, up-to-date public sources.
+        model: 'gemini_3_flash',
+        add_context_from_internet: true,
         prompt:
-          `You are a security knowledge-base assistant for an analyst. Answer the question using ONLY the analyst's notes below. ` +
-          `Cite which note title(s) you used. If the answer is not contained in the notes, say "Not found in notes".\n\n` +
-          `NOTES:\n${context}\n\nQUESTION: ${question.trim()}`,
+          `You are an expert cybersecurity analyst assistant. Answer the analyst's question using credible, ` +
+          `up-to-date sources from the web (vendor advisories, CVE/NVD, MITRE ATT&CK, OWASP, official docs, ` +
+          `reputable security blogs). Always cite the source name and URL for every claim.\n\n` +
+          `The analyst's own findings (for context, NOT the only source):\n${noteContext}\n\n` +
+          `QUESTION: ${question.trim()}\n\n` +
+          `Format: a concise answer, then a "Sources:" list with bullet points (title — url). ` +
+          `If the web has nothing credible, say so explicitly.`,
       });
 
       const ans = typeof res === 'string' ? res : res?.response || JSON.stringify(res);
@@ -51,16 +62,11 @@ export default function NotesAIAssistant() {
     <div className="space-y-3">
       <div className="flex items-center gap-2 text-sm font-semibold text-primary">
         <Sparkles className="w-4 h-4" /> AI Knowledge Base
-        <span className="text-xs font-normal text-muted-foreground">· {notes.length} notes indexed</span>
+        <span className="text-xs font-normal text-muted-foreground">· {notes.length} notes as context</span>
       </div>
       <p className="text-xs text-muted-foreground">
-        Ask questions about your findings — answers are grounded in your saved notes only.
+        Ask anything — answers are sourced from credible web sources (CVE/NVD, MITRE, vendor advisories, OWASP) and grounded with your notes as context.
       </p>
-      {notes.length === 0 && (
-        <div className="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2">
-          Save at least one note to enable the knowledge base.
-        </div>
-      )}
       <div className="flex gap-2">
         <Textarea
           value={question}
@@ -74,7 +80,7 @@ export default function NotesAIAssistant() {
         />
         <Button
           onClick={ask}
-          disabled={loading || !question.trim() || notes.length === 0}
+          disabled={loading || !question.trim()}
           size="icon"
           className="h-9 w-9 self-end"
         >
@@ -83,7 +89,7 @@ export default function NotesAIAssistant() {
       </div>
       {loading && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="w-4 h-4 animate-spin" /> Querying your knowledge base…
+          <Loader2 className="w-4 h-4 animate-spin" /> Searching credible sources…
         </div>
       )}
       {answer && !loading && (
