@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Shield, Flame, Trophy, Menu, X, LayoutDashboard, Map, Server, GitBranch, FlaskConical, Zap, Wrench, History, User, ChevronDown, Swords, Brain, Bookmark, MessageSquare, Wand2, BarChart2, ArrowLeft, ScrollText, GraduationCap, Mail, Globe } from 'lucide-react';
 import GlobalSearch from './GlobalSearch';
+import { assetUrl } from '@/lib/assetBase';
 
 // Root paths — no back button shown on these
 const ROOT_PATHS = new Set([
@@ -123,7 +124,7 @@ export default function TopNav({ user, userPoints, streak }) {
               className={`flex items-center shrink-0 ${showBackButton ? 'hidden lg:flex' : 'flex'}`}
             >
               <img
-                src="/HackQuest/logo.png"
+                src={assetUrl('/logo.png')}
                 alt="HackQuest"
                 className="h-10 w-auto"
               />
