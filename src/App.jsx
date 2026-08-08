@@ -19,6 +19,11 @@ import { Capacitor } from '@capacitor/core';
 import { App as CapacitorApp } from '@capacitor/app';
 import { StatusBar, Style } from '@capacitor/status-bar';
 
+// The app is served at the root domain (hack-quest.com/) AND at /HackQuest/.
+// Detect which one we're on so React Router's basename matches the actual path —
+// a mismatched basename renders a blank screen (no route can match).
+const routerBasename = window.location.pathname.startsWith('/HackQuest') ? '/HackQuest' : '/';
+
 // Lazy-loaded route components for code splitting
 const Dashboard          = lazy(() => import('./pages/Dashboard'));
 const Paths              = lazy(() => import('./pages/Paths'));
@@ -160,7 +165,7 @@ function App() {
     <AuthProvider>
       <NotificationProvider>
         <QueryClientProvider client={queryClientInstance}>
-          <Router basename="/HackQuest">
+          <Router basename={routerBasename}>
             <AuthenticatedApp />
           </Router>
           <Toaster />
