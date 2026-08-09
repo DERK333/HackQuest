@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Shield, Flame, Trophy, Menu, X, LayoutDashboard, Map, Server, GitBranch, FlaskConical, Zap, Wrench, History, User, ChevronDown, Swords, Brain, Bookmark, MessageSquare, Wand2, BarChart2, ArrowLeft, ScrollText, GraduationCap, Mail, Globe } from 'lucide-react';
+import { Shield, Flame, Trophy, Menu, X, LayoutDashboard, Map, Server, GitBranch, FlaskConical, Zap, Wrench, History, User, ChevronDown, Swords, Brain, Bookmark, MessageSquare, Wand2, BarChart2, ArrowLeft, ScrollText, GraduationCap, Mail, Globe, Plug } from 'lucide-react';
 import GlobalSearch from './GlobalSearch';
 import Logo from './Logo';
 
@@ -10,7 +10,7 @@ const ROOT_PATHS = new Set([
   '/SkillTree', '/Sandbox', '/AttackSimulator', '/ScenarioBuilder',
   '/AttackHistory', '/MitreScenarioBuilder', '/QuizEngine', '/SavedQuizzes',
   '/Community', '/CreateDiscussion', '/ContentGenerator', '/Performance', '/AttackLogs', '/CourseProgressTracker',
-  '/IndexingMonitor', '/About', '/Contact',
+  '/IndexingMonitor', '/About', '/Contact', '/Connect',
 ]);
 
 const NAV_ITEMS = [
@@ -36,6 +36,7 @@ const NAV_ITEMS = [
   { label: 'Leaderboard',     path: '/Leaderboard',       icon: Trophy },
   { label: 'About',           path: '/About',             icon: Shield },
   { label: 'Contact',         path: '/Contact',           icon: Mail },
+  { label: 'Connect AI',      path: '/Connect',           icon: Plug },
 ];
 
 function NavLink({ item, mobile, onClose }) {
