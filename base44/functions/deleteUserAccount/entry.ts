@@ -10,7 +10,7 @@ Deno.serve(async (req) => {
     }
 
     // Delete all user-owned entity records
-    const [progress, quizAttempts, bookmarks, discussions, replies, upvotes, badges, attackLogs, scenarios] = await Promise.all([
+    const [progress, quizAttempts, bookmarks, discussions, replies, upvotes, badges, attackLogs, scenarios, enrollments] = await Promise.all([
       base44.entities.UserProgress.filter({ user_email: user.email }),
       base44.entities.QuizAttempt.filter({ user_email: user.email }),
       base44.entities.QuizBookmark.filter({ user_email: user.email }),
@@ -20,10 +20,12 @@ Deno.serve(async (req) => {
       base44.entities.UserBadge.filter({ user_email: user.email }),
       base44.entities.AttackLog.filter({ user_email: user.email }),
       base44.entities.CustomScenario.filter({ created_by: user.email }),
+      base44.entities.CourseEnrollment.filter({ student_email: user.email }),
     ]);
 
-    // Also fetch room comments
+    // Also fetch room comments and course progress (scoped to this user via RLS)
     const comments = await base44.entities.RoomComment.filter({ author_email: user.email });
+    const courseProgress = await base44.entities.CourseProgress.list();
 
     // Delete all in parallel
     await Promise.all([
@@ -37,6 +39,8 @@ Deno.serve(async (req) => {
       ...attackLogs.map(r => base44.entities.AttackLog.delete(r.id)),
       ...scenarios.map(r => base44.entities.CustomScenario.delete(r.id)),
       ...comments.map(r => base44.entities.RoomComment.delete(r.id)),
+      ...enrollments.map(r => base44.entities.CourseEnrollment.delete(r.id)),
+      ...courseProgress.map(r => base44.entities.CourseProgress.delete(r.id)),
     ]);
 
     // Log out the user (invalidates session)
