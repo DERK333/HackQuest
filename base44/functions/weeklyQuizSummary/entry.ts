@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
           <h2 style="color:#a3e635;margin:0 0 12px 0;font-size:16px;">🏆 Your Best Scores</h2>
           ${topBestScores.map(a => `
             <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #2d3f55;">
-              <span style="color:#e2e8f0;font-size:13px;">${a.quiz_title || 'Quiz'}</span>
+              <span style="color:#e2e8f0;font-size:13px;">${escapeHtml(a.quiz_title || 'Quiz')}</span>
               <span style="color:${a.score >= 80 ? '#a3e635' : a.score >= 60 ? '#f59e0b' : '#ef4444'};font-weight:700;font-size:14px;">${Math.round(a.score)}%</span>
             </div>`).join('')}
         </div>`
@@ -100,7 +100,7 @@ Deno.serve(async (req) => {
           <p style="color:#94a3b8;font-size:13px;margin:0 0 12px 0;">${newQuizzes.length} new quiz${newQuizzes.length > 1 ? 'zes have' : ' has'} been added — check them out!</p>
           ${newQuizzes.slice(0, 4).map(q => `
             <div style="padding:8px 12px;background:#1e3a28;border-radius:6px;margin-bottom:8px;">
-              <span style="color:#e2e8f0;font-size:13px;font-weight:600;">${q.title}</span>
+              <span style="color:#e2e8f0;font-size:13px;font-weight:600;">${escapeHtml(q.title || '')}</span>
               ${q.difficulty ? `<span style="margin-left:8px;font-size:11px;color:#94a3b8;text-transform:capitalize;">${q.difficulty}</span>` : ''}
             </div>`).join('')}
         </div>`
