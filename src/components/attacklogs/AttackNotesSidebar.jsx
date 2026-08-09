@@ -5,7 +5,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { StickyNote, Plus, FileText, FileJson } from 'lucide-react';
+import { StickyNote, Plus, FileText, FileJson, Loader2 } from 'lucide-react';
 import AttackNoteForm from './AttackNoteForm';
 import AttackNoteItem from './AttackNoteItem';
 import NotesAIAssistant from './NotesAIAssistant';
@@ -18,6 +18,7 @@ export default function AttackNotesSidebar({ open, onOpenChange, logs, presetLog
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
   const [formLogId, setFormLogId] = useState('');
+  const [driveSaving, setDriveSaving] = useState(null);
 
   const { data: notes = [], isLoading } = useQuery({
     queryKey: ['attack-notes'],
@@ -58,6 +59,22 @@ export default function AttackNotesSidebar({ open, onOpenChange, logs, presetLog
     refresh();
   };
 
+  const handleExport = async (format) => {
+    downloadNotes(notes, format);
+    setDriveSaving(format);
+    try {
+      const res = await base44.functions.invoke('exportNotesToDrive', { format });
+      toast({
+        title: 'Saved to Google Drive',
+        description: `${res.data?.file_name || 'Export'} uploaded to "${res.data?.folder || 'HackQuest Attack Notes'}".`,
+      });
+    } catch (e) {
+      toast({ title: 'Drive save failed', description: e.message, variant: 'destructive' });
+    } finally {
+      setDriveSaving(null);
+    }
+  };
+
   const handleDelete = async (note) => {
     if (!confirm('Delete this note?')) return;
     try {
@@ -92,20 +109,26 @@ export default function AttackNotesSidebar({ open, onOpenChange, logs, presetLog
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => downloadNotes(notes, 'markdown')}
-                disabled={notes.length === 0}
+                onClick={() => handleExport('markdown')}
+                disabled={notes.length === 0 || driveSaving !== null}
                 className="gap-1.5"
               >
-                <FileText className="w-4 h-4" /> Markdown
+                {driveSaving === 'markdown'
+                  ? <Loader2 className="w-4 h-4 animate-spin" />
+                  : <FileText className="w-4 h-4" />}
+                Markdown
               </Button>
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => downloadNotes(notes, 'json')}
-                disabled={notes.length === 0}
+                onClick={() => handleExport('json')}
+                disabled={notes.length === 0 || driveSaving !== null}
                 className="gap-1.5"
               >
-                <FileJson className="w-4 h-4" /> JSON
+                {driveSaving === 'json'
+                  ? <Loader2 className="w-4 h-4 animate-spin" />
+                  : <FileJson className="w-4 h-4" />}
+                JSON
               </Button>
             </div>
 
