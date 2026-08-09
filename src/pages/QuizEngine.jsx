@@ -8,6 +8,7 @@ import QuizQuestion from '@/components/quiz/QuizQuestion';
 import QuizResults from '@/components/quiz/QuizResults';
 import QuizLabLinker from '@/components/quiz/QuizLabLinker';
 import QuizBookmarkButton from '@/components/quiz/QuizBookmarkButton';
+import QuizTemplateDialog from '@/components/quiz/QuizTemplateDialog';
 
 const DIFF_STYLE = {
   easy:   { color: 'text-primary',    bg: 'bg-primary/10 border-primary/20' },
@@ -120,6 +121,7 @@ export default function QuizEngine() {
   const [generating, setGenerating] = useState(false);
   const [filterDiff, setFilterDiff] = useState('all');
   const [linkingQuiz, setLinkingQuiz] = useState(null);
+  const [templateOpen, setTemplateOpen] = useState(false);
   const timerRef = useRef(null);
   const startRef = useRef(null);
   const queryClient = useQueryClient();
@@ -368,10 +370,15 @@ Return JSON matching the schema exactly.`,
           </h1>
           <p className="text-sm text-muted-foreground mt-1">Test your knowledge with randomized, graded quizzes</p>
         </div>
-        <Button onClick={generateAIQuiz} disabled={generating} className="gap-2 shrink-0">
-          {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-          {generating ? 'Generating...' : 'AI Generate Quiz'}
-        </Button>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button variant="outline" onClick={() => setTemplateOpen(true)} className="gap-2">
+            <Sparkles className="w-4 h-4" /> New from Template
+          </Button>
+          <Button onClick={generateAIQuiz} disabled={generating} className="gap-2">
+            {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+            {generating ? 'Generating...' : 'AI Generate Quiz'}
+          </Button>
+        </div>
       </div>
 
       {/* Stats bar */}
@@ -439,6 +446,8 @@ Return JSON matching the schema exactly.`,
       {linkingQuiz && (
         <QuizLabLinker quiz={linkingQuiz} onClose={() => setLinkingQuiz(null)} />
       )}
+
+      <QuizTemplateDialog open={templateOpen} onOpenChange={setTemplateOpen} />
     </div>
   );
 }
