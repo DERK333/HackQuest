@@ -1,0 +1,71 @@
+{
+  "auth": "oauth",
+  "tools": {
+    "functions": [
+      {
+        "name": "get_course_recommendations",
+        "title": "Get course recommendations",
+        "description": "Returns 3-5 personalized learning-path and room recommendations for a student, based on their enrollments and module progress. Call this when a student asks what to learn next on HackQuest. Read-only; does not modify any data.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "studentEmail": { "type": "string", "description": "The student's email address." },
+            "studentName": { "type": "string", "description": "The student's display name." },
+            "enrollments": {
+              "type": "array",
+              "description": "The student's course enrollments. Each item has course_title (string) and enrollment_date (string).",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "course_title": { "type": "string" },
+                  "enrollment_date": { "type": "string" }
+                }
+              }
+            },
+            "courseProgress": {
+              "type": "array",
+              "description": "The student's module progress. Each item has module_title (string), status (one of not_started, in_progress, completed), and completion_date (string, may be null).",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "module_title": { "type": "string" },
+                  "status": { "type": "string" },
+                  "completion_date": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "handler": "getCourseRecommendations",
+        "annotations": { "read_only_hint": true, "destructive_hint": false, "idempotent_hint": false }
+      },
+      {
+        "name": "generate_certificate",
+        "title": "Generate quiz certificate",
+        "description": "Generates a PDF certificate of achievement for a completed quiz, awarded to the signed-in user. Call this after a user passes a quiz and wants their certificate. Returns a PDF file; read-only with respect to app data.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "quiz_title": { "type": "string", "description": "The title of the completed quiz." },
+            "score": { "type": "number", "description": "Percentage score from 0 to 100." },
+            "attempt_date": { "type": "string", "description": "ISO date string for the attempt; defaults to today if omitted." }
+          },
+          "required": ["quiz_title", "score"]
+        },
+        "handler": "generateCertificate",
+        "annotations": { "read_only_hint": true, "destructive_hint": false, "idempotent_hint": false }
+      },
+      {
+        "name": "check_missing_material",
+        "title": "Check missing learning material",
+        "description": "Admin-only audit that lists rooms whose tasks are missing learning material. Call this to find rooms that still need educational content. Read-only; requires an admin account.",
+        "input_schema": {
+          "type": "object",
+          "properties": {}
+        },
+        "handler": "checkMissingMaterial",
+        "annotations": { "read_only_hint": true, "destructive_hint": false, "idempotent_hint": true }
+      }
+    ]
+  }
+}

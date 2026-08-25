@@ -9,6 +9,7 @@ import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
 import MicrosoftIcon from "@/components/MicrosoftIcon";
 import AppleIcon from "@/components/AppleIcon";
+import { safeReturnTo } from "@/lib/authReturnTo";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -22,7 +23,7 @@ export default function Login() {
     setLoading(true);
     try {
       await base44.auth.loginViaEmailPassword(email, password);
-      window.location.href = "/";
+      window.location.href = safeReturnTo();
     } catch (err) {
       setError(err.message || "Invalid email or password");
     } finally {
@@ -31,15 +32,15 @@ export default function Login() {
   };
 
   const handleGoogle = () => {
-    base44.auth.loginWithProvider("google", "/");
+    base44.auth.loginWithProvider("google", safeReturnTo());
   };
 
   const handleMicrosoft = () => {
-    base44.auth.loginWithProvider("microsoft", "/");
+    base44.auth.loginWithProvider("microsoft", safeReturnTo());
   };
 
   const handleApple = () => {
-    base44.auth.loginWithProvider("apple", "/");
+    base44.auth.loginWithProvider("apple", safeReturnTo());
   };
 
   return (

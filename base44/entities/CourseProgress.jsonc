@@ -44,9 +44,7 @@
     "read": {
       "$or": [
         {
-          "data.enrollment_id": {
-            "$in": "{{base44.entities.CourseEnrollment.filter({'data.student_email':'{{user.email}}'},'id')}}"
-          }
+          "created_by_id": "{{user.id}}"
         },
         {
           "user_condition": {
@@ -56,14 +54,28 @@
       ]
     },
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }

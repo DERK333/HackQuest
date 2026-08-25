@@ -15,6 +15,15 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import OAuthConsent from './pages/OAuthConsent';
+import { Capacitor } from '@capacitor/core';
+import { App as CapacitorApp } from '@capacitor/app';
+import { StatusBar, Style } from '@capacitor/status-bar';
+
+// The app is served at the root domain (hack-quest.com/) AND at /HackQuest/.
+// Detect which one we're on so React Router's basename matches the actual path —
+// a mismatched basename renders a blank screen (no route can match).
+const routerBasename = window.location.pathname.startsWith('/HackQuest') ? '/HackQuest' : '/';
 
 // Lazy-loaded route components for code splitting
 const Dashboard          = lazy(() => import('./pages/Dashboard'));
@@ -41,6 +50,8 @@ const AttackLogs             = lazy(() => import('./pages/AttackLogs'));
 const CourseProgressTracker  = lazy(() => import('./pages/CourseProgressTracker'));
 const About                  = lazy(() => import('./pages/About'));
 const Contact                = lazy(() => import('./pages/Contact'));
+const IndexingMonitor        = lazy(() => import('./pages/IndexingMonitor'));
+const Connect                = lazy(() => import('./pages/Connect'));
 
 function PageLoader() {
   return (
@@ -75,6 +86,7 @@ const AuthenticatedApp = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/oauth/consent" element={<OAuthConsent />} />
 
       {/* All app routes require authentication */}
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
@@ -104,6 +116,8 @@ const AuthenticatedApp = () => {
           <Route path="/CourseProgressTracker" element={<CourseProgressTracker />} />
           <Route path="/About" element={<About />} />
           <Route path="/Contact" element={<Contact />} />
+          <Route path="/IndexingMonitor" element={<IndexingMonitor />} />
+          <Route path="/Connect" element={<Connect />} />
         </Route>
       </Route>
 
@@ -116,22 +130,46 @@ const AuthenticatedApp = () => {
 
 function App() {
   React.useEffect(() => {
+    const isNative = Capacitor.isNativePlatform();
+
     const apply = (dark) => {
       document.documentElement.classList.toggle('dark', dark);
       document.documentElement.classList.toggle('light', !dark);
+      if (isNative) {
+        StatusBar.setStyle({ style: dark ? Style.Dark : Style.Light }).catch(() => {});
+      }
     };
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
     apply(mq.matches);
     const handler = (e) => apply(e.matches);
     mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
+
+    let backListener;
+    if (isNative) {
+      StatusBar.setOverlaysWebView({ overlay: true }).catch(() => {});
+      CapacitorApp.addListener('backButton', ({ canGoBack }) => {
+        const path = window.location.pathname.replace('/HackQuest', '') || '/';
+        if (path === '/' || path === '/Dashboard') {
+          CapacitorApp.exitApp();
+        } else if (canGoBack) {
+          window.history.back();
+        } else {
+          CapacitorApp.exitApp();
+        }
+      }).then((listener) => { backListener = listener; });
+    }
+
+    return () => {
+      mq.removeEventListener('change', handler);
+      backListener?.remove();
+    };
   }, []);
 
   return (
     <AuthProvider>
       <NotificationProvider>
         <QueryClientProvider client={queryClientInstance}>
-          <Router basename="/HackQuest">
+          <Router basename={routerBasename}>
             <AuthenticatedApp />
           </Router>
           <Toaster />

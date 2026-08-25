@@ -9,8 +9,8 @@ import AuthLayout from "@/components/AuthLayout";
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
-  // Firebase sends oobCode in the reset-password link; fall back to legacy 'token' param
-  const resetToken = searchParams.get("oobCode") || searchParams.get("token");
+  // Base44 sends the reset token as the 'token' query param in the reset email link
+  const resetToken = searchParams.get("token");
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");

@@ -1,16 +1,13 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
+import { escapeHtml } from "../../shared/escapeHtml.ts";
 
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
 
-  // Allow scheduled automation invocations; otherwise require admin
-  const platformToken = req.headers.get('x-base44-automation') || req.headers.get('x-platform-token');
-  const appId = Deno.env.get('BASE44_APP_ID');
-  if (!platformToken || platformToken !== appId) {
-    const user = await base44.auth.me().catch(() => null);
-    if (!user || user.role !== 'admin') {
-      return Response.json({ error: 'Forbidden' }, { status: 403 });
-    }
+  // Require an authenticated admin session (scheduled automations run authenticated)
+  const user = await base44.auth.me().catch(() => null);
+  if (!user || user.role !== 'admin') {
+    return Response.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   const serviceBase44 = base44.asServiceRole;
@@ -91,7 +88,7 @@ Deno.serve(async (req) => {
           <h2 style="color:#a3e635;margin:0 0 12px 0;font-size:16px;">🏆 Your Best Scores</h2>
           ${topBestScores.map(a => `
             <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #2d3f55;">
-              <span style="color:#e2e8f0;font-size:13px;">${a.quiz_title || 'Quiz'}</span>
+              <span style="color:#e2e8f0;font-size:13px;">${escapeHtml(a.quiz_title || 'Quiz')}</span>
               <span style="color:${a.score >= 80 ? '#a3e635' : a.score >= 60 ? '#f59e0b' : '#ef4444'};font-weight:700;font-size:14px;">${Math.round(a.score)}%</span>
             </div>`).join('')}
         </div>`
@@ -103,7 +100,7 @@ Deno.serve(async (req) => {
           <p style="color:#94a3b8;font-size:13px;margin:0 0 12px 0;">${newQuizzes.length} new quiz${newQuizzes.length > 1 ? 'zes have' : ' has'} been added — check them out!</p>
           ${newQuizzes.slice(0, 4).map(q => `
             <div style="padding:8px 12px;background:#1e3a28;border-radius:6px;margin-bottom:8px;">
-              <span style="color:#e2e8f0;font-size:13px;font-weight:600;">${q.title}</span>
+              <span style="color:#e2e8f0;font-size:13px;font-weight:600;">${escapeHtml(q.title || '')}</span>
               ${q.difficulty ? `<span style="margin-left:8px;font-size:11px;color:#94a3b8;text-transform:capitalize;">${q.difficulty}</span>` : ''}
             </div>`).join('')}
         </div>`
@@ -122,7 +119,7 @@ Deno.serve(async (req) => {
         <span style="font-size:20px;font-weight:900;color:#0f1923;">TryHack<span>Me</span></span>
       </div>
       <h1 style="color:#f1f5f9;font-size:22px;margin:0 0 6px 0;">Your Weekly Summary 📬</h1>
-      <p style="color:#64748b;font-size:14px;margin:0;">Here's how you did this week, ${user.full_name || 'Hacker'}</p>
+      <p style="color:#64748b;font-size:14px;margin:0;">Here's how you did this week, ${escapeHtml(user.full_name || 'Hacker')}</p>
     </div>
 
     ${weeklyActivitySection}

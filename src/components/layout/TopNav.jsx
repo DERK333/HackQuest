@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Shield, Flame, Trophy, Menu, X, LayoutDashboard, Map, Server, GitBranch, FlaskConical, Zap, Wrench, History, User, ChevronDown, Swords, Brain, Bookmark, MessageSquare, Wand2, BarChart2, ArrowLeft, ScrollText, GraduationCap, Mail } from 'lucide-react';
+import { Shield, Flame, Trophy, Menu, X, LayoutDashboard, Map, Server, GitBranch, FlaskConical, Zap, Wrench, History, User, ChevronDown, Swords, Brain, Bookmark, MessageSquare, Wand2, BarChart2, ArrowLeft, ScrollText, GraduationCap, Mail, Globe, Plug } from 'lucide-react';
 import GlobalSearch from './GlobalSearch';
+import Logo from './Logo';
 
 // Root paths — no back button shown on these
 const ROOT_PATHS = new Set([
@@ -9,7 +10,7 @@ const ROOT_PATHS = new Set([
   '/SkillTree', '/Sandbox', '/AttackSimulator', '/ScenarioBuilder',
   '/AttackHistory', '/MitreScenarioBuilder', '/QuizEngine', '/SavedQuizzes',
   '/Community', '/CreateDiscussion', '/ContentGenerator', '/Performance', '/AttackLogs', '/CourseProgressTracker',
-  '/About', '/Contact',
+  '/IndexingMonitor', '/About', '/Contact', '/Connect',
 ]);
 
 const NAV_ITEMS = [
@@ -29,11 +30,13 @@ const NAV_ITEMS = [
   { label: 'Saved Spot',      path: '/SavedQuizzes',      icon: Bookmark },
   { label: 'Progress',        path: '/CourseProgressTracker', icon: GraduationCap },
   { label: 'Admin',           path: '/ContentGenerator',  icon: Wand2 },
+  { label: 'SEO Monitor',     path: '/IndexingMonitor',   icon: Globe },
   { label: 'Performance',     path: '/Performance',       icon: BarChart2 },
   { label: 'Community',       path: '/Community',         icon: MessageSquare },
   { label: 'Leaderboard',     path: '/Leaderboard',       icon: Trophy },
   { label: 'About',           path: '/About',             icon: Shield },
   { label: 'Contact',         path: '/Contact',           icon: Mail },
+  { label: 'Connect AI',      path: '/Connect',           icon: Plug },
 ];
 
 function NavLink({ item, mobile, onClose }) {
@@ -119,13 +122,10 @@ export default function TopNav({ user, userPoints, streak }) {
             {/* Logo — always visible on desktop, on mobile only on root screens */}
             <Link
               to="/Dashboard"
+              aria-label="HackQuest home"
               className={`flex items-center shrink-0 ${showBackButton ? 'hidden lg:flex' : 'flex'}`}
             >
-              <img
-                src="/HackQuest/logo.png"
-                alt="HackQuest"
-                className="h-10 w-auto"
-              />
+              <Logo />
             </Link>
 
             {/* Desktop Nav */}
