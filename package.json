@@ -13,8 +13,8 @@
     "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
-    "@base44/sdk": "^0.8.43",
-    "@base44/vite-plugin": "^1.0.31",
+    "@base44/sdk": "^0.8.44",
+    "@base44/vite-plugin": "^1.0.32",
     "@capacitor/android": "^8.4.1",
     "@capacitor/app": "^8.1.1",
     "@capacitor/core": "^8.4.1",
