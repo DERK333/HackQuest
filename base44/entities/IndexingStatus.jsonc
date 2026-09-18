@@ -65,6 +65,11 @@
     "error_message": {
       "type": "string",
       "description": "Error message if the GSC inspection call failed"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Optional notes or description for this indexing status"
     }
   },
   "required": [

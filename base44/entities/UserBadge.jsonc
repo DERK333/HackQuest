@@ -21,6 +21,11 @@
     "badge_description": {
       "type": "string",
       "description": "Description of how the badge was earned"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Optional notes or description for this badge record"
     }
   },
   "required": [
