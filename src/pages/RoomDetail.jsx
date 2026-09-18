@@ -138,6 +138,7 @@ export default function RoomDetail() {
       
       const totalQuestions = room.tasks.reduce((s, t) => s + (t.questions?.length || 0), 0);
       if (newCompleted.length >= totalQuestions) {
+        base44.analytics.track({ eventName: 'room_completed', properties: { room_id: roomId, room_title: room.title } });
         notify.roomComplete(room.title, room.points || 100);
       } else {
         toast.success('Correct! 🎉');
