@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Shield, Flame, Trophy, Menu, X, LayoutDashboard, Map, Server, GitBranch, FlaskConical, Zap, Wrench, History, User, ChevronDown, Swords, Brain, Bookmark, MessageSquare, Wand2, BarChart2, ArrowLeft, ScrollText, GraduationCap, Mail, Globe, Plug } from 'lucide-react';
 import GlobalSearch from './GlobalSearch';
@@ -39,32 +39,32 @@ const NAV_ITEMS = [
   { label: 'Connect AI',      path: '/Connect',           icon: Plug },
 ];
 
-function NavLink({ item, mobile, onClose }) {
+function DrawerLink({ item, onClose }) {
   const location = useLocation();
   const [open, setOpen] = useState(false);
 
   if (item.children) {
     const isActive = item.children.some(c => location.pathname === c.path);
     return (
-      <div className="relative" onMouseEnter={() => !mobile && setOpen(true)} onMouseLeave={() => !mobile && setOpen(false)}>
+      <div>
         <button
           onClick={() => setOpen(o => !o)}
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-            isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+          aria-expanded={open}
+          className={`flex items-center w-full gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+            isActive ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
           }`}
         >
           {item.label}
-          <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`ml-auto w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`} />
         </button>
         {open && (
-          <div className={`${mobile ? 'relative mt-1 ml-4' : 'absolute top-full left-0 z-50 pt-2'} min-w-[200px]`}>
-          <div className={`${mobile ? '' : 'bg-card border border-border rounded-xl shadow-2xl shadow-black/40 overflow-hidden'} py-1`}>
+          <div className="ml-4 mt-1 space-y-1 border-l border-border pl-2">
             {item.children.map(child => (
               <Link
                 key={child.path}
                 to={child.path}
                 onClick={onClose}
-                className={`flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors ${
+                className={`flex items-center gap-2.5 px-4 py-2.5 rounded-lg text-sm transition-colors ${
                   location.pathname === child.path
                     ? 'text-primary bg-primary/10'
                     : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
@@ -74,7 +74,6 @@ function NavLink({ item, mobile, onClose }) {
                 {child.label}
               </Link>
             ))}
-          </div>
           </div>
         )}
       </div>
@@ -86,8 +85,8 @@ function NavLink({ item, mobile, onClose }) {
     <Link
       to={item.path}
       onClick={onClose}
-      className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-        isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+      className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+        isActive ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
       }`}
     >
       {item.label}
@@ -96,19 +95,28 @@ function NavLink({ item, mobile, onClose }) {
 }
 
 export default function TopNav({ user, userPoints, streak }) {
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
   const isRootPath = ROOT_PATHS.has(location.pathname);
   const showBackButton = !isRootPath;
 
+  // Close the drawer when the route changes
+  useEffect(() => { setDrawerOpen(false); }, [location.pathname]);
+
+  // Lock body scroll while the drawer is open
+  useEffect(() => {
+    document.body.style.overflow = drawerOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [drawerOpen]);
+
   return (
     <>
       <header className="sticky top-0 z-50 border-b border-border bg-sidebar/95 backdrop-blur-xl" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="max-w-[1400px] mx-auto px-4 lg:px-8">
-          <div className="flex items-center h-14 gap-4">
-            {/* Back button on child screens (mobile) / Logo on root screens */}
+          <div className="flex items-center h-14 gap-3">
+            {/* Back button on child screens (mobile) */}
             {showBackButton ? (
               <button
                 onClick={() => navigate(-1)}
@@ -119,21 +127,24 @@ export default function TopNav({ user, userPoints, streak }) {
               </button>
             ) : null}
 
-            {/* Logo — always visible on desktop, on mobile only on root screens */}
+            {/* Slideout toggle */}
+            <button
+              onClick={() => setDrawerOpen(o => !o)}
+              aria-label="Open navigation menu"
+              aria-expanded={drawerOpen}
+              className="flex items-center justify-center w-9 h-9 min-w-[44px] min-h-[44px] rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors shrink-0"
+            >
+              {drawerOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+
+            {/* Logo */}
             <Link
               to="/Dashboard"
               aria-label="HackQuest home"
-              className={`flex items-center shrink-0 ${showBackButton ? 'hidden lg:flex' : 'flex'}`}
+              className={`flex items-center shrink-0 ${showBackButton ? 'hidden sm:flex' : 'flex'}`}
             >
               <Logo />
             </Link>
-
-            {/* Desktop Nav */}
-            <nav className="hidden lg:flex items-center gap-1 ml-4">
-              {NAV_ITEMS.map(item => (
-                <NavLink key={item.label} item={item} />
-              ))}
-            </nav>
 
             {/* Right side */}
             <div className="ml-auto flex items-center gap-2">
@@ -158,27 +169,45 @@ export default function TopNav({ user, userPoints, streak }) {
                   {user?.full_name ? user.full_name[0].toUpperCase() : <User className="w-4 h-4" />}
                 </span>
               </Link>
-
-              {/* Mobile burger */}
-              <button
-                className="lg:hidden p-2 rounded-lg hover:bg-secondary transition-colors"
-                onClick={() => setMobileOpen(o => !o)}
-              >
-                {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </button>
             </div>
           </div>
         </div>
-
-        {/* Mobile menu */}
-        {mobileOpen && (
-          <div className="lg:hidden border-t border-border bg-sidebar px-4 py-3 space-y-1">
-            {NAV_ITEMS.map(item => (
-              <NavLink key={item.label} item={item} mobile onClose={() => setMobileOpen(false)} />
-            ))}
-          </div>
-        )}
       </header>
+
+      {/* Slideout overlay */}
+      {drawerOpen && (
+        <div className="fixed inset-0 bg-black/60 z-40" onClick={() => setDrawerOpen(false)} />
+      )}
+
+      {/* Left slideout navigation */}
+      <aside
+        aria-hidden={!drawerOpen}
+        className={`fixed top-0 left-0 h-full w-72 z-50 bg-sidebar border-r border-border flex flex-col transition-transform duration-300 ease-in-out ${
+          drawerOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+        style={{ paddingTop: 'env(safe-area-inset-top)' }}
+      >
+        {/* Header */}
+        <div className="p-4 flex items-center justify-between border-b border-border">
+          <Link to="/Dashboard" onClick={() => setDrawerOpen(false)} className="flex items-center gap-2" aria-label="HackQuest home">
+            <Logo />
+          </Link>
+          <button
+            onClick={() => setDrawerOpen(false)}
+            aria-label="Close navigation menu"
+            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Nav */}
+        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+          {NAV_ITEMS.map(item => (
+            <DrawerLink key={item.label} item={item} onClose={() => setDrawerOpen(false)} />
+          ))}
+        </nav>
+      </aside>
     </>
   );
 }
